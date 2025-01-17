@@ -1,6 +1,7 @@
 import d3 from 'd3';
 import jsonldVis from '../src/';
-import data from './example.json';
+//import data from './example.json';
+import data from './wot.json';
 
 jsonldVis(d3);
 

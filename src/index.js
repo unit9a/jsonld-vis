@@ -1,5 +1,8 @@
 import d3Tip from 'd3-tip';
 
+import * as mods from './mods';
+
+
 export default function(d3) {
   // browserify
   if (!d3.tip) {
@@ -65,12 +68,17 @@ export default function(d3) {
         tree.isIdNode = true;
         tree.isBlankNode = true;
         // random id, can replace with actual uuid generator if needed
-        tree.name = '_:b' + Math.random().toString(10).slice(-7);
+        tree.name =
+          '_:b' +
+          Math.random()
+            .toString(10)
+            .slice(-7);
       }
 
       let children = [];
       Object.keys(source).forEach(key => {
-        if (key === '@id' || key === '@context' || source[key] === null) return;
+        if (key === '@id' || key === '@context'
+          && ! mods.isWotJsonLD(source) || source[key] === null) return;
         let valueExtended, value;
         if (typeof source[key] === 'object' && !Array.isArray(source[key])) {
           children.push({
@@ -146,7 +154,10 @@ export default function(d3) {
           if (d.valueExtended) tip.show(d);
         })
         .on('mouseout', tip.hide);
-      let maxSpan = Math.max.apply(Math, nodes.map(d => d.y + maxLabelWidth));
+      let maxSpan = Math.max.apply(
+        Math,
+        nodes.map(d => d.y + maxLabelWidth)
+      );
       if (maxSpan + maxLabelWidth + 20 > w) {
         changeSVGWidth(maxSpan + maxLabelWidth);
         d3.select(selector).node().scrollLeft = source.y0;
@@ -179,10 +190,14 @@ export default function(d3) {
       nodeExit.select('text').style('fill-opacity', 0);
 
       let link = svg.selectAll('path.link').data(links, d => d.target.id);
-      link.enter().insert('path', 'g').attr('class', 'link').attr('d', () => {
-        let o = { x: source.x0, y: source.y0 };
-        return diagonal({ source: o, target: o });
-      });
+      link
+        .enter()
+        .insert('path', 'g')
+        .attr('class', 'link')
+        .attr('d', () => {
+          let o = { x: source.x0, y: source.y0 };
+          return diagonal({ source: o, target: o });
+        });
       link
         .transition()
         .duration(transitionDuration)
